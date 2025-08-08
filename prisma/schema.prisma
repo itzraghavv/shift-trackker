@@ -12,3 +12,78 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id           String   @id @default(uuid())
+  auth0Id      String   @unique
+  email        String   @unique
+  name         String?
+  role         Role     @default(CARE_WORKER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  shifts       Shift[]
+  organizations OrganizationMember[]
+}
+
+model Organization {
+  id           String   @id @default(uuid())
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  members      OrganizationMember[]
+  perimeters   Perimeter[]
+  shifts       Shift[]
+}
+
+model OrganizationMember {
+  id              String        @id @default(uuid())
+  userId          String
+  organizationId  String
+  role            OrgRole       @default(STAFF)
+  createdAt       DateTime      @default(now())
+  user            User          @relation(fields: [userId], references: [id])
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+
+  @@unique([userId, organizationId])
+}
+
+model Perimeter {
+  id              String        @id @default(uuid())
+  organizationId  String
+  name            String
+  centerLat       Float
+  centerLng       Float
+  radiusMeters    Int
+  active          Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+}
+
+model Shift {
+  id            String   @id @default(uuid())
+  userId        String
+  organizationId String
+  startTime     DateTime
+  startLat      Float?
+  startLng      Float?
+  startNote     String?
+  endTime       DateTime?
+  endLat        Float?
+  endLng        Float?
+  endNote       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+  organization  Organization @relation(fields: [organizationId], references: [id])
+}
+
+enum Role {
+  MANAGER
+  CARE_WORKER
+}
+
+enum OrgRole {
+  ADMIN
+  STAFF
+}
