@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '../../../lib/prisma'
+import prisma from '@/prisma'
 
 export async function GET() {
   try {
@@ -27,8 +27,9 @@ export async function POST(request: NextRequest) {
     const shift = await prisma.shift.create({
       data: {
         startTime: new Date(startTime),
-        employeeId,
-        notes
+        userId: employeeId,
+        organizationId: 'default-org',
+        startNote: notes
       }
     })
 
