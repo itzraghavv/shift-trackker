@@ -131,8 +131,10 @@ const resolvers = {
       });
     },
     upsertPerimeter: async (_: unknown, { input }: any, ctx: any) => {
-      // For simplicity, allow any authenticated user for now; in real app, check admin rights
       if (!ctx.userId) throw new Error('Unauthorized');
+      // Check manager role via membership or user role
+      const me = await prisma.user.findUnique({ where: { id: ctx.userId } });
+      if (me?.role !== 'MANAGER') throw new Error('Forbidden');
       const { id, orgId, name, centerLat, centerLng, radiusMeters, active } = input;
       if (id) {
         return prisma.perimeter.update({

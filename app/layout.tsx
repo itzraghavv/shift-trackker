@@ -5,6 +5,7 @@ import Providers from "./providers";
 import HeaderNav from "./(components)/HeaderNav";
 import AutoGeofence from "./(components)/AutoGeofence";
 import OrgProvider from "./(components)/OrgContext";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,13 +32,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          <OrgProvider>
-            <HeaderNav />
-            <AutoGeofence />
-            {children}
-          </OrgProvider>
-        </Providers>
+        <AntdRegistry>
+          <Providers>
+            <OrgProvider>
+              <HeaderNav />
+              <AutoGeofence />
+              {children}
+            </OrgProvider>
+          </Providers>
+        </AntdRegistry>
       </body>
     </html>
   );

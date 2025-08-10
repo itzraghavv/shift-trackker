@@ -5,6 +5,7 @@ import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend } from 'chart.js';
 import { useLocationContext } from '@/app/providers';
 import AuthGuard from '@/app/(components)/AuthGuard';
+import { Alert } from 'antd';
 
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
 
@@ -27,16 +28,23 @@ export default function ManagerPage() {
   const [dashboard, setDashboard] = useState<any[]>([]);
   const [staffHours, setStaffHours] = useState<any[]>([]);
 
+  const [forbidden, setForbidden] = useState(false);
   useEffect(() => {
     (async () => {
-      const data = await gql<{ perimeters: any[]; shifts: any[]; dashboard: any[]; staffHours: any[] }>(
-        `query($orgId: ID!){ perimeters(orgId:$orgId){ id name centerLat centerLng radiusMeters active } shifts(orgId:$orgId){ id userId startTime endTime } dashboard(orgId:$orgId){ date count avgHours } staffHours(orgId:$orgId){ userId hours } }`,
-        { orgId }
-      );
-      setPerimeters(data.perimeters);
-      setShifts(data.shifts);
-      setDashboard(data.dashboard);
-      setStaffHours(data.staffHours);
+      try {
+        const me = await gql<{ me: { role: string } | null }>('query{ me{ role } }');
+        if (!me.me || me.me.role !== 'MANAGER') { setForbidden(true); return; }
+        const data = await gql<{ perimeters: any[]; shifts: any[]; dashboard: any[]; staffHours: any[] }>(
+          `query($orgId: ID!){ perimeters(orgId:$orgId){ id name centerLat centerLng radiusMeters active } shifts(orgId:$orgId){ id userId startTime endTime } dashboard(orgId:$orgId){ date count avgHours } staffHours(orgId:$orgId){ userId hours } }`,
+          { orgId }
+        );
+        setPerimeters(data.perimeters);
+        setShifts(data.shifts);
+        setDashboard(data.dashboard);
+        setStaffHours(data.staffHours);
+      } catch {
+        setForbidden(true);
+      }
     })();
   }, []);
 
@@ -65,6 +73,16 @@ export default function ManagerPage() {
       { label: 'Avg Hours', data: dashboard.map((d) => d.avgHours), borderColor: '#52c41a', backgroundColor: 'rgba(82,196,26,0.2)' },
     ],
   }), [dashboard]);
+
+  if (forbidden) {
+    return (
+      <AuthGuard>
+        <div style={{ maxWidth: 800, margin: '24px auto', padding: 16 }}>
+          <Alert type="error" message="Forbidden" description="You must be a manager to access this page." />
+        </div>
+      </AuthGuard>
+    );
+  }
 
   return (
     <AuthGuard>
