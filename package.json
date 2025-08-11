@@ -19,6 +19,7 @@
     "graphql": "^16.9.0",
     "graphql-yoga": "^5.10.8",
     "graphql-scalars": "^1.23.0",
+    "@ant-design/nextjs-registry": "^1.0.3",
     "react-chartjs-2": "^5.2.0",
     "@auth0/nextjs-auth0": "^3.5.0",
     "next": "15.4.6",

@@ -18,12 +18,7 @@ export default function Home() {
             <Link href="/manager">
               <Button>Manager Dashboard</Button>
             </Link>
-            <a href="/api/auth/login">
-              <Button>Login</Button>
-            </a>
-            <a href="/api/auth/logout">
-              <Button>Logout</Button>
-            </a>
+            <a href="/api/auth/login"><Button>Login</Button></a>
           </Space>
         </Space>
       </Card>
